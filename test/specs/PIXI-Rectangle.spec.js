@@ -77,7 +77,7 @@ describe('Rectangle.vue', function () {
       `
         <PIXI ref="pixi">
             <Rectangle pid="rect1" :left="x" :top="y" :color="color1"></Rectangle>
-            <Rectangle pid="rect2" :left="isFollow?x2:$calc('rect1.right')" :top="isFollow?y2:$calc('rect1.bottom')" :color="color2" @click="toggleFellow()"></Rectangle>
+            <Rectangle pid="rect2" :right="isFollow?$calc('rect1.right+100'):$calc('R_WIDTH-100')" :left="isFollow?$calc('rect1.left-100'):100" :top="isFollow?$calc('rect1.top-100'):100" :bottom="isFollow?$calc('rect1.bottom+100'):$calc('R_HEIGHT-100')" :alpha="0.5" :color="color2" @click="toggleFellow()"></Rectangle>
         </PIXI>
       `,
       {

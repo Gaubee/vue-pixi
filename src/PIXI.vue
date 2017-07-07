@@ -38,11 +38,18 @@ export default {
     beforeCreate() {
         this.$pixiApp = new PIXI.Application({});
         this.$pixiStage = this.$pixiApp.stage;
-        this.$pixiRenderer = this.$pixiApp.renderer;
+        const renderer = this.$pixiRenderer = this.$pixiApp.renderer;
         this.$pixiTicker = this.$pixiApp.ticker;
         this.$pixiLevel = 0;
         this.$pixiPidElmapList = ArrayWithDefault(MapWithSetter);
-        this.$pixiPidScope = {};
+        this.$pixiPidScope = {
+            get R_WIDTH(){
+                return renderer.width
+            },
+            get R_HEIGHT(){
+                return renderer.height
+            }
+        };
 
         // this.$pixiTicker.add(() => {
         //     console.log("lastTime", this.$pixiTicker.lastTime)

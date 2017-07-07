@@ -13,16 +13,41 @@ export function $calc (evalCode) {
 export default {
   props: {
     pid: String,
-    left: { type: [Number, CalcProp], default: 0 },
-    top: { type: [Number, CalcProp], default: 0 },
-    width: { type: [Number, CalcProp], default: 100 },
-    height: { type: [Number, CalcProp], default: 100 },
-    right: { type: [Number, CalcProp] },
-    bottom: { type: [Number, CalcProp] },
+    left: {
+      type: [Number, CalcProp],
+      default: 0
+    },
+    top: {
+      type: [Number, CalcProp],
+      default: 0
+    },
+    width: {
+      type: [Number, CalcProp],
+      default: 100
+    },
+    height: {
+      type: [Number, CalcProp],
+      default: 100
+    },
+    right: {
+      type: [Number, CalcProp]
+    },
+    bottom: {
+      type: [Number, CalcProp]
+    },
     // pointerEvents: { type: [Boolean, CalcProp], default: true },
-    cursor: { type: [String, CalcProp], default: 'auto' },
-    buttonMode: { type: [Boolean, CalcProp], default: false },
-    interactive: { type: [Boolean, CalcProp], default: true }
+    cursor: {
+      type: [String, CalcProp],
+      default: 'auto'
+    },
+    buttonMode: {
+      type: [Boolean, CalcProp],
+      default: false
+    },
+    interactive: {
+      type: [Boolean, CalcProp],
+      default: true
+    }
   },
   data () {
     return {
@@ -40,17 +65,20 @@ export default {
     this.$pixiPidElmapList = this.$parent.$pixiPidElmapList
     this.$pixiPidScope = this.$parent.$pixiPidScope
 
+    this.__drawData__ = {
+      $vue: this
+    }
     const pid = this.$options.propsData.pid
     if (pid) {
       this.$pixiPidElmapList.get(this.$pixiLevel)(pid, this)
-      this.$pixiPidScope[pid] = this
+      this.$pixiPidScope[pid] = this.__drawData__
     }
   },
   created () {
     const el = this.$pixiEl
     const ticker = this.$pixiTicker
     const propsData = this.$options.propsData
-    const pid = this.$options.propsData.pid
+    // const pid = this.$options.propsData.pid
     this.$pixiParent.addChild(el);
     // 绑定事件
     [
@@ -114,8 +142,9 @@ export default {
         propName,
         propVal => {
           el[propName] = propVal
-        },
-        { immediate: true }
+        }, {
+          immediate: true
+        }
       )
     })
 
@@ -136,142 +165,22 @@ export default {
      */
 
     // 绑定绘制函数使用的计算属性
-    const drawData = (this.__drawData__ = {
-      $vue: this
-    })
     this.$options._propKeys.forEach(key => {
       if (key === 'pid' || key === '$vue') {
         return
       }
-      Object.defineProperty(drawData, key, {
-        configurable: true,
-        get: () => {
-          return this.$comProp(this[key])
-        }
-      })
-    })
+      this.$resetCalcProp(key)
+    });
 
     // 实现left、top、right、bottom与with、height之间的约束关系
-    const propsHasL = propsData.hasOwnProperty('left')
-    const propsHasR = propsData.hasOwnProperty('right')
-    const propsHasW = propsData.hasOwnProperty('width')
-    const propsHasT = propsData.hasOwnProperty('top')
-    const propsHasB = propsData.hasOwnProperty('bottom')
-    const propsHasH = propsData.hasOwnProperty('height')
-    if (propsHasL && propsHasR) {
-      if (propsHasW) {
-        console.warn('left、right、width三个属性不可同时定义，默认忽视width属性')
-      }
-      let _width
-      Object.defineProperty(drawData, 'width', {
-        configurable: true,
-        get: () => {
-          return _width
-        }
-      })
-      this.$watch(
-        () => drawData.right - drawData.left,
-        width => {
-          _width = width
-        },
-        {
-          immediate: true
-        }
-      )
-    } else if (propsHasL) {
-      // propsHasL+width
-      let _right
-      Object.defineProperty(drawData, 'right', {
-        configurable: true,
-        get: () => {
-          return _right
-        }
-      })
-      this.$watch(
-        () => drawData.left + drawData.width,
-        right => {
-          _right = right
-        },
-        {
-          immediate: true
-        }
-      )
-    } else if (propsHasR) {
-      // propsHasR+width
-      let _left
-      Object.defineProperty(drawData, 'left', {
-        configurable: true,
-        get: () => {
-          return _left
-        }
-      })
-      this.$watch(
-        () => drawData.right - drawData.width,
-        left => {
-          _left = left
-        },
-        {
-          immediate: true
-        }
-      )
-    }
-    if (propsHasT && propsHasB) {
-      if (propsHasH) {
-        console.warn('top、bottom、height三个属性不可同时定义，默认忽视height属性')
-      }
-      let _height
-      Object.defineProperty(drawData, 'height', {
-        configurable: true,
-        get: () => {
-          return _height
-        }
-      })
-      this.$watch(
-        () => drawData.bottom - drawData.top,
-        height => {
-          _height = height
-        },
-        {
-          immediate: true
-        }
-      )
-    } else if (propsHasT) {
-      // propsHasT+height
-      let _bottom
-      Object.defineProperty(drawData, 'bottom', {
-        configurable: true,
-        get: () => {
-          return _bottom
-        }
-      })
-      this.$watch(
-        () => drawData.top + drawData.height,
-        bottom => {
-          _bottom = bottom
-        },
-        {
-          immediate: true
-        }
-      )
-    } else if (propsHasB) {
-      // propsHasB+height
-      let _top
-      Object.defineProperty(drawData, 'top', {
-        configurable: true,
-        get: () => {
-          return _top
-        }
-      })
-      this.$watch(
-        () => drawData.bottom - drawData.height,
-        top => {
-          _top = top
-        },
-        {
-          immediate: true
-        }
-      )
-    }
+    ['left', 'width', 'right'].forEach(key => {
+      this.$watch(key, this.$resetCalcLWR.bind(this))
+    });
+    ['top', 'height', 'bottom'].forEach(key => {
+      this.$watch(key, this.$resetCalcTHB.bind(this))
+    })
+    this.$resetCalcLWR()
+    this.$resetCalcTHB()
   },
   methods: {
     $getEl (id) {
@@ -322,7 +231,7 @@ export default {
     $comProp (comProp) {
       if (comProp instanceof CalcProp) {
         this.REAL_TIME_CALCULATION = true
-        return RUNWITHEVAL(this.$pixiPidScope, comProp.evalCode)
+        return RUNWITHEVAL.call(this.__drawData__, this.$pixiPidScope, comProp.evalCode)
       } else {
         return comProp
       }
@@ -330,6 +239,98 @@ export default {
     $calc,
     beforeDraw () {
       this.REAL_TIME_CALCULATION = false
+    },
+    $resetCalcProp (key) {
+      Object.defineProperty(this.__drawData__, key, {
+        configurable: true,
+        get: () => {
+          return this.$comProp(this[key])
+        }
+      })
+    },
+    $resetCalcLWR () {
+      const drawData = this.__drawData__
+      const propsData = this.$options.propsData
+      const propsHasL = propsData.hasOwnProperty('left') && propsData.left !== '' && propsData.left !== null && propsData.left !== false
+      const propsHasR = propsData.hasOwnProperty('right') && propsData.right !== '' && propsData.right !== null && propsData.right !== false
+      const propsHasW = propsData.hasOwnProperty('width') && propsData.width !== '' && propsData.width !== null && propsData.width !== false
+      const CUR_LRW = '' + propsHasL + propsHasR + propsHasW
+      if (this.__CACHE_LRW__ === CUR_LRW) {
+        return
+      }
+      this.__CACHE_LRW__ = CUR_LRW
+      if (propsHasL && propsHasR) {
+        if (propsHasW) {
+          console.warn('left、right、width三个属性不可同时定义，默认忽视width属性')
+        }
+        const comProp = $calc('this.right - this.left')
+        Object.defineProperty(drawData, 'width', {
+          configurable: true,
+          get: () => {
+            return this.$comProp(comProp)
+          }
+        })
+      } else if (propsHasL) {
+        // propsHasL+width
+        const comProp = $calc('this.left + this.width')
+        Object.defineProperty(drawData, 'right', {
+          configurable: true,
+          get: () => {
+            return this.$comProp(comProp)
+          }
+        })
+      } else if (propsHasR) {
+        // propsHasR+width
+        const comProp = $calc('this.right - this.width')
+        Object.defineProperty(drawData, 'left', {
+          configurable: true,
+          get: () => {
+            return this.$comProp(comProp)
+          }
+        })
+      }
+    },
+    $resetCalcTHB () {
+      const drawData = this.__drawData__
+      const propsData = this.$options.propsData
+      const propsHasT = propsData.hasOwnProperty('top') && propsData.top !== '' && propsData.top !== null && propsData.top !== false
+      const propsHasB = propsData.hasOwnProperty('bottom') && propsData.bottom !== '' && propsData.bottom !== null && propsData.bottom !== false
+      const propsHasH = propsData.hasOwnProperty('height') && propsData.height !== '' && propsData.height !== null && propsData.height !== false
+      const CUR_TBH = '' + propsHasT + propsHasB + propsHasH
+      if (this.__CACHE_TBH__ === CUR_TBH) {
+        return
+      }
+      this.__CACHE_TBH__ = CUR_TBH
+      if (propsHasT && propsHasB) {
+        if (propsHasH) {
+          console.warn('top、bottom、height三个属性不可同时定义，默认忽视height属性')
+        }
+        const comProp = $calc('this.bottom - this.top')
+        Object.defineProperty(drawData, 'height', {
+          configurable: true,
+          get: () => {
+            return this.$comProp(comProp)
+          }
+        })
+      } else if (propsHasT) {
+        // propsHasT+height
+        const comProp = $calc('this.top + this.height')
+        Object.defineProperty(drawData, 'bottom', {
+          configurable: true,
+          get: () => {
+            return this.$comProp(comProp)
+          }
+        })
+      } else if (propsHasB) {
+        // propsHasB+height
+        const comProp = $calc('this.bottom - this.height')
+        Object.defineProperty(drawData, 'top', {
+          configurable: true,
+          get: () => {
+            return this.$comProp(comProp)
+          }
+        })
+      }
     }
   },
   computed: {
