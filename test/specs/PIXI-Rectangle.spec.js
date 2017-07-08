@@ -1,5 +1,9 @@
-import { PIXI, Rectangle, $calc } from 'src/'
-import { createVM } from '../helpers/utils.js'
+import plugin,{$calc} from 'src/'
+import {
+  createVM,
+  Vue
+} from '../helpers/utils.js'
+plugin(Vue)
 // describe('Rectangle.vue', function () {
 //   it('测试color,x,y属性的绑定', function () {
 //     const vm = createVM(
@@ -71,23 +75,56 @@ import { createVM } from '../helpers/utils.js'
 //   })
 // })
 describe('Rectangle.vue', function () {
-  it('测试计算属性', function () {
+  it('测试计算属性，点击切换布局模式', function () {
     const vm = createVM(
       this,
       `
         <PIXI ref="pixi">
-            <Rectangle pid="rect1" :left="x" :top="y" :color="color1"></Rectangle>
-            <Rectangle pid="rect2" :right="isFollow?$calc('rect1.right+100'):$calc('R_WIDTH-100')" :left="isFollow?$calc('rect1.left-100'):100" :top="isFollow?$calc('rect1.top-100'):100" :bottom="isFollow?$calc('rect1.bottom+100'):$calc('R_HEIGHT-100')" :alpha="0.5" :color="color2" @click="toggleFellow()"></Rectangle>
+            <Rectangle
+              pid="rect1"
+              :width="width"
+              :height="height"
+              :left="x"
+              :top="y"
+              :color="color1"></Rectangle>
+            <pixi-Text :text="$calc('rect1.left')" :color="0xffffff"></pixi-Text>
+            <Rectangle
+              v-if="isFollow"
+              pid="rect2"
+              :right="$calc('rect1.right+100')"
+              :left="$calc('rect1.left-100')"
+              :top="$calc('rect1.top-100')"
+              :bottom="$calc('rect1.bottom+100')"
+              :alpha="0.5"
+              :color="color2"
+              @click="toggleFellow()">
+            </Rectangle>
+            <Rectangle
+              v-else
+              pid="rect2"
+              :right="$calc('R_WIDTH-100')"
+              :left="100"
+              :top="100"
+              :bottom="$calc('R_HEIGHT-100')"
+              :alpha="0.5"
+              :color="color2"
+              @click="toggleFellow()">
+            </Rectangle>
         </PIXI>
-      `,
-      {
-        components: { PIXI, Rectangle },
+      `, {
+        components: {
+          // PIXI,
+          // Rectangle,
+          // PIXIText
+        },
         data () {
           return {
-            color1: 0xffffff * Math.random(),
-            color2: 0xffffff * Math.random(),
-            x: Math.random() * 100,
-            y: Math.random() * 100,
+            color1: 0xffff00,
+            color2: 0xff00ff,
+            width: 100,
+            height: 100,
+            x: 50,
+            y: 50,
             isFollow: false,
             x2: 300,
             y2: 200
@@ -99,8 +136,10 @@ describe('Rectangle.vue', function () {
           var xAcc = 1
           var yAcc = 1
           pixi.$pixiTicker.add(() => {
-            const maxX = pixiRenderer.width - 100 // rect.width
-            const maxY = pixiRenderer.height - 100 // rect.height
+            this.width += xAcc / 2
+            this.height += yAcc / 2
+            const maxX = pixiRenderer.width - this.width
+            const maxY = pixiRenderer.height - this.height
             this.x += xAcc
             this.y += yAcc
             if (this.x < 0 || this.x > maxX) {
